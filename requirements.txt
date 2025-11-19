@@ -1,0 +1,21 @@
+# Core LiveKit dependencies - Updated to 1.2.0+
+livekit
+livekit-agents>=1.2.0
+livekit-plugins-deepgram
+livekit-plugins-silero
+livekit-plugins-google
+
+# HTTP client
+httpx
+
+# Environment variables
+python-dotenv
+
+# Timezone support
+tzdata
+
+# Google AI (Gemini)
+google-generativeai
+
+# Additional utilities
+aiohttp
