@@ -1,0 +1,1201 @@
+{
+  "name": "call agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=appointment date&time : {{ $json['appointment_date & time '] }}\n\nname :{{ $json['Client Name '] }}\nPhone number : {{ $json['phone number'] }}\nemail :{{ $json.Email }}\nInterested In :{{ $json['Courses '] }}\n\n\n\n",
+        "options": {
+          "systemMessage": "=You are an intelligent appointment booking assistant.\n\nYour job is to:\n\nConfirm the client’s details (name, email, course, time)\n\nBook the appointment directly using the attached Google Calendar tool\n\nProvide a clear, short confirmation message\n\nAsk the user if they want to reschedule or cancel\n\nImportant Guidelines:\n\nAlways assume availability and create the event\n\nDo not check for conflicts or availability\n\nDo not ask about slots — book exactly what the user asked\n\nKeep tone professional, friendly, and efficient\n\nAlways respond with:\n“Your appointment for [Course] has been confirmed on [Date] at [Time]. A confirmation email will be sent shortly. Would you like to reschedule or cancel it?”"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2496,
+        1152
+      ],
+      "id": "0e27bbc1-d261-45f2-b234-b238258e200c",
+      "name": "AI Agent",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab2737ba-e6c5-4da1-b32a-322eb3cd2ff2",
+              "name": "Client Name ",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "e7a77adc-1732-404f-a188-fe113ede94e0",
+              "name": "Email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "53df29ff-8ab0-4abc-88f6-031176bad279",
+              "name": "Courses ",
+              "value": "={{ $json.body.course }}",
+              "type": "string"
+            },
+            {
+              "id": "9c7dca05-e68f-4fa0-a7d7-2399bbde8fcb",
+              "name": "appointment_date & time ",
+              "value": "={{ $json.body.appointment_time }}-{{ $json.body.appointment_date }}",
+              "type": "string"
+            },
+            {
+              "id": "e98a9b29-c435-4fa2-9a6a-41241772ae63",
+              "name": "Notes ",
+              "value": "={{ $json.body.notes }}",
+              "type": "string"
+            },
+            {
+              "id": "b8a5860d-a047-4e17-bd36-79873db4b927",
+              "name": "Timestamp",
+              "value": "={{ $json.body.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "886dff49-72ed-4af6-9965-54b05b281f55",
+              "name": "customer_Insights",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "838081f6-8dc4-4a7a-9abd-cd8d1c565a7f",
+              "name": "phone number",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "33d8b6a5-8c6c-45df-ac48-a66e50fe0745",
+              "name": "Note ",
+              "value": "={{ $json.body.notes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3760,
+        528
+      ],
+      "id": "b09e5def-c3c5-43bd-96e3-c6761e03f2ca",
+      "name": "Filtering User Data"
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct-0905",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3216,
+        832
+      ],
+      "id": "29bf13fd-1326-41a7-a9a6-0cffb0fa5593",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BDUlneCPAyGRmL33",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2ba34884-d573-48cc-888b-f76dfbe0024c",
+              "name": "Email",
+              "value": "={{ $('Filtering User Data').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "892ea758-f52a-4c0b-86de-3238268b4f89",
+              "name": "AI resposne",
+              "value": "={{ $('Basic LLM Chain').item.json.output.AI_response }}",
+              "type": "string"
+            },
+            {
+              "id": "9a5054cf-e457-49f2-bbaa-6a5ffbf469f9",
+              "name": "Meeting link ",
+              "value": "={{ $json.hangoutLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2352,
+        544
+      ],
+      "id": "329d2183-c3d6-49e1-9759-77fd7da679ed",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event in Google Calendar  Always Book a Accurate perfect time slots ",
+        "calendar": {
+          "__rl": true,
+          "value": "2937d85f1e262c6966fbcb3e06873fe45ffb305521dc652e1465ab9c1130efbf@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', `Create a accurate events Exact time to time `, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', `Create a accurate events Exact time to time `, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        2640,
+        1376
+      ],
+      "id": "6847179a-9521-4ed9-97ee-a70a197adea5",
+      "name": "Creating a Event ",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6X8LTpdHks1mH0QI",
+          "name": "Google Calendar account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['AI resposne'] }}\n\nadd the Meeting Link : {{ $json['Meeting link '] }}\n\nadd the user deatils :\n\nname :{{ $('Filtering User Data').item.json['Client Name '] }}\nemail : {{ $('Filtering User Data').item.json.Email }}\ncourse : {{ $('Filtering User Data').item.json['Courses '] }}\nbooked sloct : {{ $json['AI resposne'] }}\n\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=You are an AI email designer for appointment confirmations. Your role is to generate professional, visually appealing HTML email bodies.\n\nINPUT DATA:\n- AI confirmation response text\n- Client details (name, phone, email, service, appointment date/time, notes)\n\nAlways use Join meeting Button Highlets and middle on email\n\nYOUR TASK:\n1. Transform the AI response into a polished, professional email\n2. Create a complete HTML email body with:\n   - Responsive design (mobile-friendly)\n   - Professional color scheme\n   - Clear typography and spacing\n   - Company branding with logo\n   - Structured appointment details\n   - Clear call-to-action buttons\n\nHTML STRUCTURE REQUIREMENTS:\n- Use inline CSS for maximum email client compatibility\n- ALWAYS include company logo at the top: <img src=\"https://i.ibb.co/27TJTDxq/call-agent-email-logo.jpg\" alt=\"Company Logo\" style=\"max-width: 200px;\">\n- Display appointment details in a clean, scannable format\n- Add contact information and support section\n- Include footer with company details\n- Use professional fonts (Arial, Helvetica, sans-serif)\n- Maintain proper spacing and alignment\n\nDESIGN PRINCIPLES:\n- Clean, modern aesthetic\n- High contrast for readability\n- Professional color palette (blues, grays, or brand colors)\n- Clear visual hierarchy\n- Emphasis on key information (date, time, service)\n\nOUTPUT FORMAT:\nProvide only the complete HTML code ready to send. No explanations or markdown. Start with <!DOCTYPE html> and end with </html>.\n\nThe logo URL is mandatory in every email. Ensure the email conveys professionalism, builds trust, and provides all necessary information clearly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -1968,
+        544
+      ],
+      "id": "cf622ab1-51d3-4919-b8b9-14a853dc90fd",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        848
+      ],
+      "id": "7db1ad68-d508-49e8-9ffa-fe350860634d",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "vX6sgZZ4Eg1EUXkv",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Subject\":\"string\",\n\t\"Body\":\"string\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1696,
+        800
+      ],
+      "id": "0ba82d81-fc17-42c7-88e2-abc7a64c45c2",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.Email }},jashwanthboddupally@gmail.com",
+        "subject": "=BOTCAMPUS AI {{ $json.output.Subject }}",
+        "message": "={{ $json.output.Body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1424,
+        544
+      ],
+      "id": "e0b75994-daf2-405d-a4f3-79ace1a7925d",
+      "name": "Send a message",
+      "webhookId": "077de70c-6f9e-4cd3-9231-6fbf14d5b0ed",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "37opFBOVBN4qxrn4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1088048330,
+          "mode": "list",
+          "cachedResultName": "Booking Botcampus Appointment CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI/edit#gid=1088048330"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json['Client Name '] }}",
+            "Email": "={{ $json.Email }}",
+            "Phone ": "={{ $json['phone Number'] }}",
+            "Interested In": "={{ $json['Courses '] }}",
+            "Notes ": "={{ $json['Notes '] }}",
+            "Aappointment_date & time": "={{ $json['appointment_date & time '] }}",
+            "TimeStamp": "={{ $json.Timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes ",
+              "displayName": "Notes ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Aappointment_date & time",
+              "displayName": "Aappointment_date & time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeStamp",
+              "displayName": "TimeStamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2528,
+        1584
+      ],
+      "id": "7befe5d7-1a55-4f1b-9e6d-9c24e36ea10d",
+      "name": "Append row in sheet",
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1088048330,
+          "mode": "list",
+          "cachedResultName": "Booking Botcampus Appointment CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JfUJ3E0hevU3laYzaGUxULYT-SbBmxOEJVK-tD71qVI/edit#gid=1088048330"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Filtering User Data').item.json['Client Name '] }}",
+            "Insights of Customer ": "={{ $('AI Agent').item.json.output }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes ",
+              "displayName": "Notes ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Aappointment_date & time",
+              "displayName": "Aappointment_date & time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TimeStamp",
+              "displayName": "TimeStamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Insights of Customer ",
+              "displayName": "Insights of Customer ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2752,
+        1584
+      ],
+      "id": "19e713a6-9447-4d3c-aef2-da7be226cd8e",
+      "name": "Append or update row in sheet",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Call-agent-livekit",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -4064,
+        528
+      ],
+      "id": "ee1eda93-d2cd-4ba2-b2dc-cf37331e5d81",
+      "name": "Webhook1",
+      "webhookId": "6cd4be88-b9c7-4a49-acb1-e7a03381d1ff"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.Email }}",
+        "additionalFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "notes",
+                "value": "={{ $json['Notes '] }}"
+              },
+              {
+                "property": "appointment_details",
+                "value": "={{ $json['appointment_date & time '] }}"
+              },
+              {
+                "property": "phone_number",
+                "value": "={{ $json['phone number'] }}"
+              }
+            ]
+          },
+          "firstName": "={{ $json['Client Name '] }}",
+          "message": "={{ $json['Courses '] }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        -2992,
+        256
+      ],
+      "id": "25b50a1d-00cc-4335-9231-a15386763cba",
+      "name": "CRM",
+      "alwaysOutputData": false,
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "s5xvDi3MKJJ3et0A",
+          "name": "HubSpot account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Filtering User Data').item.json.Email }}",
+        "additionalFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "customer_insights",
+                "value": "={{ $('Edit Fields').item.json['AI resposne'] }}"
+              }
+            ]
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        -1056,
+        544
+      ],
+      "id": "789fe29e-56d8-42f9-8195-b17faa4baffa",
+      "name": "CRM-update",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "s5xvDi3MKJJ3et0A",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nstart date : {{ $json.body.start_date }}\nend date : {{ $json.body.end_date }}\nzone : {{ $json.body.timezone }}\n{{ $json.body.company }}\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=You are a smart scheduling assistant that helps users check availability and book appointments based on fixed daily time slots. Each day is divided into 4 predefined appointment slots:\n\n- Slot 1: 09:00 AM – 11:00 AM\n- Slot 2: 11:30 AM – 12:30 PM\n- Slot 3: 02:00 PM – 04:00 PM\n- Slot 4: 04:30 PM – 06:00 PM\n\nOnly return the slots that are available for booking. Do not suggest partial availability or custom times.\n\nRespond ONLY in this JSON format:\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"available_slots\": [\n    { \"slot\": \"Slot 2\", \"time\": \"11:30 AM – 12:30 PM\" },\n    { \"slot\": \"Slot 3\", \"time\": \"02:00 PM – 04:00 PM\" }\n  ],\n  \"total_available\": 2,\n  \"fully_booked\": false\n}\n\nIf there are no available slots, return:\n{\n  \"date\": \"YYYY-MM-DD\",\n  \"available_slots\": [],\n  \"total_available\": 0,\n  \"fully_booked\": true\n}\n\nDo not return markdown, explanation, or comments — only valid JSON.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -3136,
+        1360
+      ],
+      "id": "66ce869e-f232-4ab4-b276-be60736de2d1",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        1600
+      ],
+      "id": "5d9e57bd-9ae8-423d-803a-0450b8633880",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "BDUlneCPAyGRmL33",
+          "name": "Groq account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Define fixed slot ranges (start and end in minutes)\nconst fixedSlots = [\n  { label: 'Slot 1 (10:00–11:00)', start: 9 * 60, end: 11 * 60 },\n  { label: 'Slot 2 (11:30–12:30)', start: 11 * 60 + 30, end: 12 * 60 + 30 },\n  { label: 'Slot 3 (14:00–16:00)', start: 14 * 60, end: 16 * 60 },\n  { label: 'Slot 4 (16:30–18:00)', start: 16 * 60 + 30, end: 18 * 60 },\n];\n\n// Helper: Convert JS datetime string to minutes\nconst toTimeMins = datetime => {\n  const date = new Date(datetime);\n  return date.getHours() * 60 + date.getMinutes();\n};\n\n// Gather all booked intervals from calendar events\nconst bookedIntervals = $input.all().map(item => {\n  const start = item.json.start?.dateTime;\n  const end = item.json.end?.dateTime;\n  if (!start || !end) return null;\n  return { start: toTimeMins(start), end: toTimeMins(end) };\n}).filter(Boolean);\n\n// Check if a fixed slot is free (no overlap with booked intervals)\nconst isSlotFree = (slot) => {\n  return !bookedIntervals.some(event =>\n    !(event.end <= slot.start || event.start >= slot.end)\n  );\n};\n\n// Filter and return only the available slots\nconst availableSlots = fixedSlots\n  .filter(isSlotFree)\n  .map(slot => slot.label);\n\n// Final response\nreturn {\n  json: {\n    success: true,\n    date: $('Check-Avaliability ').first().json.date,\n    available_slots: availableSlots,\n    total: availableSlots.length,\n    message: availableSlots.length === 0 ? \"No slots available for this date\" : null\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        1584
+      ],
+      "id": "aff522f2-3701-4545-9854-c91842221a03",
+      "name": "Code in JavaScript",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2720,
+        1360
+      ],
+      "id": "fd7202cf-3cc7-489a-bf51-79aede1ecb98",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook/check-availability",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3536,
+        1360
+      ],
+      "id": "36fac337-9cf6-4c95-9e19-d8775bdddcfb",
+      "name": "Check-Avaliability ",
+      "webhookId": "eb1cb787-3229-48c9-b894-5ee7d213a452"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "2937d85f1e262c6966fbcb3e06873fe45ffb305521dc652e1465ab9c1130efbf@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $json.date + 'T00:00:00+05:30' }}",
+        "timeMax": "={{ $json.date + 'T23:59:59+05:30' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2592,
+        1584
+      ],
+      "id": "ba3b36d7-0f5e-40ed-8dd2-2a517a0ca50b",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6X8LTpdHks1mH0QI",
+          "name": "Google Calendar account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "2937d85f1e262c6966fbcb3e06873fe45ffb305521dc652e1465ab9c1130efbf@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "returnAll": true,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -2848,
+        1600
+      ],
+      "id": "7eec7ed8-1247-4b10-bae2-9e93ebdab681",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6X8LTpdHks1mH0QI",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -3216,
+        1616
+      ],
+      "id": "ac4a407e-e3a3-4d21-97ca-939f2dac402b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vH8UqMWmcM4YzdB3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "2937d85f1e262c6966fbcb3e06873fe45ffb305521dc652e1465ab9c1130efbf@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "start": "={{ $json.output.start }}",
+        "end": "={{ $json.output.End }}",
+        "additionalFields": {
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "={{ $json.output.Description }}",
+          "summary": "={{ $json.output.Summary }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -2656,
+        544
+      ],
+      "id": "a5b3c46e-78ed-4b97-a63d-bca14ba4fb3b",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6X8LTpdHks1mH0QI",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=appointment_date & time: {{ $json['appointment_date & time '] }}\nname: {{ $json['Client Name '] }}\nemail: {{ $json.Email }}\nphone: {{ $json[\"phone number\"] }}\ncourse: {{ $json['Courses '] }}\nNotes : {{ $json['Note '] }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a calendar event formatter. Your task is to take raw user-provided appointment input in the format:\n\n\"appointment_date & time\": \"HH:MM-YYYY-MM-DD\"\n\nAnd convert it into a structured JSON output with the following fields:\n\n- start: Full ISO 8601 datetime string (with timezone +05:30) – suitable for Google Calendar's `start.dateTime`\n- end: End time (1 hour after start), ISO 8601 format (also +05:30 timezone)\n- summary: Short title like \"Appointment with [Client Name] for [Course]\"\n- description: Includes full client details (name, email, phone, course, date & time)\n\nAlways respond with:\n“Your appointment for [Course] has been confirmed on [Date] at [Time]. A confirmation email will be sent shortly. Would you like to reschedule or cancel it?”\n\nAlways return output strictly in this JSON format:\n{\n  \"start\": \"YYYY-MM-DDTHH:MM:SS+05:30\",\n  \"end\": \"YYYY-MM-DDTHH:MM:SS+05:30\",\n  \"summary\": \"string\",\n  \"description\": \"string\"\n}\nTimezone must always be +05:30 (Asia/Kolkata). Do not include partial formats or explanations.\n\noutput :\n\n{\n  \"start\": \"2025-11-17T10:00:00+05:30\",\n  \"end\": \"2025-11-17T11:00:00+05:30\",\n  \"summary\": \" string\",\n  \"description\": \"Name: Jaishwand\\nEmail: jashubotcampus@gmail.com\\nPhone: 9010767269\\nCourse: N8N\\nDate & Time: 10:00-2025-11-17\",\n  \"AI_response\":\" string\"\n}\n\n\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -3088,
+        544
+      ],
+      "id": "827ca628-e6da-45fc-8914-297fbe78ec30",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"start\":\"string\",\n  \"End\": \"string\",\n  \"Summary\" : \"string\",\n  \"Description\" : \"string\",\n  \"AI_response\":\" string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -2864,
+        832
+      ],
+      "id": "480eecfe-3eab-4153-8972-1165d6b40609",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "height": 912,
+        "width": 832
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "9a5fb639-f951-469b-aebc-257411fc2010",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -3072,
+        1616
+      ],
+      "id": "34684346-1830-46dd-841d-4664738c310b",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BzFMSWUWI2RYwFSz",
+          "name": "Paid-LLM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -3024,
+        832
+      ],
+      "id": "d2f3d30c-4969-478a-a0b1-e1162b5aa008",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BzFMSWUWI2RYwFSz",
+          "name": "Paid-LLM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        848
+      ],
+      "id": "6ffa8ed9-723b-4ecb-8267-f4db49b1b1a1",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BzFMSWUWI2RYwFSz",
+          "name": "Paid-LLM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1664,
+        976
+      ],
+      "id": "c0329268-8634-4971-b88d-1341a62b02f2",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BzFMSWUWI2RYwFSz",
+          "name": "Paid-LLM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Booking + CRM + confirm Mail  Meeting Link Workflow",
+        "height": 1040,
+        "width": 3472,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4128,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "b14898a7-0f9d-43a9-9699-99b9490cf698",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# check slots\n",
+        "height": 608,
+        "width": 1536,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3696,
+        1280
+      ],
+      "typeVersion": 1,
+      "id": "9f0601b4-18a9-4007-8369-09b038207400",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Filtering User Data": {
+      "main": [
+        [
+          {
+            "node": "CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creating a Event ": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "CRM-update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Filtering User Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check-Avaliability ": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2d4f0088-332e-4d2a-8719-3287462161ce",
+  "meta": {
+    "instanceId": "6c0ecd7736716c776215b4e392382de1626c4422dcda8e0b428da63e7273ae37"
+  },
+  "id": "OPUKld5SpQAancBz",
+  "tags": []
+}
